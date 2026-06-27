@@ -37,11 +37,26 @@ export const getDashboardStats = async (req, res) => {
 
     const netRevenue = (totalRevenue || 0) - (totalExpenseAmount[0]?.total || 0);
 
+    const uniqueClients = await Project.distinct('clientEmail');
+    const totalCustomers = uniqueClients.length;
+    const totalEnquiries = totalMessages;
+
+    const salesAgg = await LetterHead.aggregate([
+      { $match: { type: { $in: ['Invoice', 'Bill'] } } },
+      { $group: { _id: null, total: { $sum: '$total' } } },
+    ]);
+    const totalSales = salesAgg[0]?.total || 0;
+
+    const pendingProjects = await Project.countDocuments({ status: { $in: ['Pending', 'In Progress'] } });
+
+    const totalDocs = await LetterHead.countDocuments();
+
     res.json({
       totalLeads,
       newLeads,
       totalProjects,
       activeProjects,
+      pendingProjects,
       totalMessages,
       unreadMessages,
       totalRevenue,
@@ -54,6 +69,10 @@ export const getDashboardStats = async (req, res) => {
       recentExpenses,
       recentLeads,
       recentProjects,
+      totalCustomers,
+      totalEnquiries,
+      totalSales,
+      totalDocs,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
