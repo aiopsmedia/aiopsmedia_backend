@@ -2,6 +2,7 @@ import Lead from '../models/Lead.js';
 import Project from '../models/Project.js';
 import Contact from '../models/Contact.js';
 import LetterHead from '../models/LetterHead.js';
+import Expense from '../models/Expense.js';
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -21,8 +22,20 @@ export const getDashboardStats = async (req, res) => {
       .filter(p => p.paymentStatus === 'Partial')
       .reduce((sum, p) => sum + (p.budget || 0), 0);
 
-    const recentLeads = await Lead.find().sort({ createdAt: -1 }).limit(5);
-    const recentProjects = await Project.find().sort({ createdAt: -1 }).limit(5);
+    const totalExpenses = await Expense.countDocuments();
+    const totalExpenseAmount = await Expense.aggregate([
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]);
+    const expensesByCategory = await Expense.aggregate([
+      { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
+      { $sort: { total: -1 } },
+    ]);
+    const recentExpenses = await Expense.find()
+      .populate('project', 'title')
+      .sort({ date: -1 })
+      .limit(5);
+
+    const netRevenue = (totalRevenue || 0) - (totalExpenseAmount[0]?.total || 0);
 
     res.json({
       totalLeads,
@@ -34,6 +47,11 @@ export const getDashboardStats = async (req, res) => {
       totalRevenue,
       paidRevenue,
       partialRevenue,
+      totalExpenses,
+      totalExpenseAmount: totalExpenseAmount[0]?.total || 0,
+      netRevenue,
+      expensesByCategory,
+      recentExpenses,
       recentLeads,
       recentProjects,
     });

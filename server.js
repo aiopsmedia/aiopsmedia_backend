@@ -8,6 +8,7 @@ import leadRoutes from './routes/leads.js';
 import projectRoutes from './routes/projects.js';
 import letterHeadRoutes from './routes/letterHead.js';
 import contactRoutes from './routes/contact.js';
+import expenseRoutes from './routes/expenses.js';
 import dashboardRoutes from './routes/dashboard.js';
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use('/api/leads', leadRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/letterhead', letterHeadRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/expenses', expenseRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 app.get(['/sitemap.xml', '/api/sitemap'], (req, res) => {
@@ -39,6 +41,7 @@ app.get(['/sitemap.xml', '/api/sitemap'], (req, res) => {
     { loc: '/admin/leads', priority: 0.3, changefreq: 'daily' },
     { loc: '/admin/projects', priority: 0.3, changefreq: 'daily' },
     { loc: '/admin/revenue', priority: 0.3, changefreq: 'daily' },
+    { loc: '/admin/expenses', priority: 0.3, changefreq: 'daily' },
   ];
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
