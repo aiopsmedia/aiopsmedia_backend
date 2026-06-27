@@ -67,8 +67,6 @@ export const getDashboardStats = async (req, res) => {
       netRevenue,
       expensesByCategory,
       recentExpenses,
-      recentLeads,
-      recentProjects,
       totalCustomers,
       totalEnquiries,
       totalSales,
