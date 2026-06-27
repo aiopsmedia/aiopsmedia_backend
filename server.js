@@ -25,21 +25,27 @@ app.use('/api/letterhead', letterHeadRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-app.get('/api/sitemap', (req, res) => {
+app.get(['/sitemap.xml', '/api/sitemap'], (req, res) => {
   const baseUrl = 'https://aiopsmedia.com';
   const pages = [
-    { loc: '/', priority: 1.0 },
-    { loc: '/about', priority: 0.8 },
-    { loc: '/services', priority: 0.9 },
-    { loc: '/pricing', priority: 0.8 },
-    { loc: '/contact', priority: 0.7 },
-    { loc: '/privacy-policy', priority: 0.5 },
-    { loc: '/refund-policy', priority: 0.5 },
+    { loc: '/', priority: 1.0, changefreq: 'weekly' },
+    { loc: '/about', priority: 0.8, changefreq: 'monthly' },
+    { loc: '/services', priority: 0.9, changefreq: 'monthly' },
+    { loc: '/pricing', priority: 0.8, changefreq: 'monthly' },
+    { loc: '/contact', priority: 0.7, changefreq: 'monthly' },
+    { loc: '/privacy-policy', priority: 0.5, changefreq: 'yearly' },
+    { loc: '/refund-policy', priority: 0.5, changefreq: 'yearly' },
+    { loc: '/admin', priority: 0.3, changefreq: 'daily' },
+    { loc: '/admin/leads', priority: 0.3, changefreq: 'daily' },
+    { loc: '/admin/projects', priority: 0.3, changefreq: 'daily' },
+    { loc: '/admin/revenue', priority: 0.3, changefreq: 'daily' },
   ];
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${pages.map(p => `<url>
     <loc>${baseUrl}${p.loc}</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`).join('\n  ')}
 </urlset>`;
