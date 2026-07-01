@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import Admin from './models/Admin.js';
+import Blog from './models/Blog.js';
 import authRoutes from './routes/auth.js';
 import leadRoutes from './routes/leads.js';
 import projectRoutes from './routes/projects.js';
@@ -10,6 +11,7 @@ import letterHeadRoutes from './routes/letterHead.js';
 import contactRoutes from './routes/contact.js';
 import expenseRoutes from './routes/expenses.js';
 import dashboardRoutes from './routes/dashboard.js';
+import blogRoutes from './routes/blogs.js';
 
 dotenv.config();
 connectDB();
@@ -26,8 +28,9 @@ app.use('/api/letterhead', letterHeadRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/blogs', blogRoutes);
 
-app.get(['/sitemap.xml', '/api/sitemap'], (req, res) => {
+app.get(['/sitemap.xml', '/api/sitemap'], async (req, res) => {
   const baseUrl = 'https://aiopsmedia.com';
   const pages = [
     { loc: '/', priority: 1.0, changefreq: 'weekly' },
@@ -48,11 +51,19 @@ app.get(['/sitemap.xml', '/api/sitemap'], (req, res) => {
     { loc: '/admin/revenue', priority: 0.3, changefreq: 'daily' },
     { loc: '/admin/expenses', priority: 0.3, changefreq: 'daily' },
   ];
+  try {
+    const blogPosts = await Blog.find({ published: true }).select('slug updatedAt').sort({ publishedAt: -1 });
+    blogPosts.forEach(blog => {
+      pages.push({ loc: `/blog/${blog.slug}`, priority: 0.7, changefreq: 'weekly' });
+    });
+  } catch (err) {
+    console.error('Sitemap blog fetch error:', err.message);
+  }
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${pages.map(p => `<url>
     <loc>${baseUrl}${p.loc}</loc>
-    <lastmod>2026-01-01</lastmod>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`).join('\n  ')}
